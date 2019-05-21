@@ -1,10 +1,9 @@
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
+#include "hooks.h"
 
-#include <stdio.h>
-#include <dlfcn.h>
-#include <unistd.h>
-#include <string.h>
+void hooks_init(void) {
+
+    return;
+}
 
 void *malloc(size_t size) {
     static void *(*real_malloc)(size_t) = NULL;
@@ -22,6 +21,7 @@ void *calloc(size_t nmemb, size_t size) {
     if (!real_calloc) {
         real_calloc = dlsym(RTLD_NEXT, "calloc");
     }
+    
     void *return_pointer = real_calloc(nmemb, size);
     fprintf(stderr, "calloc(%ld) = %p\n", size, return_pointer);
     return return_pointer;
@@ -49,4 +49,7 @@ void free(void *ptr) {
     real_free(ptr);
 }
 
-#endif
+void hooks_cleanup(void) {
+
+    return;
+}
