@@ -6,6 +6,12 @@
 #include <unistd.h>
 #include <string.h>
 
+struct alloc_info {
+    char *calle;
+    size_t mem_size;
+    void *mem_ptr;
+};
+
 static void __attribute__ ((constructor)) hooks_init(void);
 
 void *malloc(size_t size);
