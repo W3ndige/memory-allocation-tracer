@@ -2,13 +2,7 @@
 
 const size_t ALLOC_ARRAY_SIZE = 100;
 
-struct alloc_info *alloc_array;
-
-/**
- *  TODO: Enum of allocators;
- *
- * 
- **/
+alloc_info *alloc_array;
 
 int find_empty_alloc_info() {
     for (size_t i = 0; i < ALLOC_ARRAY_SIZE; i++) {
@@ -70,30 +64,36 @@ void *_malloc(size_t size) {
 
 void *malloc(size_t size) {
     void *return_pointer = _malloc(size);
-
     insert_alloc_info(return_pointer, size, "malloc");
     fprintf(stderr, "malloc(%ld) = %p\n", size, return_pointer);
     return return_pointer;
 }
 
-void *calloc(size_t nmemb, size_t size) {
+void *_calloc(size_t nmemb, size_t size) {
     static void *(*real_calloc)(size_t, size_t) = NULL;
     if (!real_calloc) {
         real_calloc = dlsym(RTLD_NEXT, "calloc");
     }
-    
-    void *return_pointer = real_calloc(nmemb, size);
+}
+
+void *calloc(size_t nmemb, size_t size) {
+    void *return_pointer = _calloc(nmemb, size);
+    insert_alloc_info(return_pointer, size, "calloc");
     fprintf(stderr, "calloc(%ld) = %p\n", size, return_pointer);
     return return_pointer;
 }
 
-void *realloc(void *ptr, size_t size) {
+void *_realloc(void *ptr, size_t size) {
     static void *(*real_realloc)(void *, size_t) = NULL;
     if (!real_realloc) {
         real_realloc = dlsym(RTLD_NEXT, "realloc");
     }
-    
-    void *return_pointer = real_realloc(ptr, size);
+}
+
+void *realloc(void *ptr, size_t size) {
+    void *return_pointer = _realloc(ptr, size);
+    remove_alloc_info(ptr);
+    insert_alloc_info(return_pointer, size, "calloc");
     fprintf(stderr, "realloc(%ld) = %p", size, return_pointer);
     return return_pointer;
 }
@@ -115,7 +115,7 @@ void free(void *ptr) {
 }
 
 void hooks_init(void) {
-    alloc_array = _malloc(ALLOC_ARRAY_SIZE * sizeof(struct alloc_info));
+    alloc_array = _malloc(ALLOC_ARRAY_SIZE * sizeof(alloc_info));
     memset(alloc_array, 0, ALLOC_ARRAY_SIZE);
 
 
